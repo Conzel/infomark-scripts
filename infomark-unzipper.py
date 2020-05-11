@@ -95,7 +95,10 @@ def split_zipname(zipname: str):
 
 
 def clean_name(name: str):
-    return name.replace("-", "").replace("_", "").replace(" ", "").strip()
+    stripped = name.replace("-", "").replace("_", "").replace(" ", "").strip()
+    # remove accents
+    normalized = unicodedata.normalize('NFKD', stripped).encode('ASCII', 'ignore').decode('UTF-8', 'ignore')
+    return normalized
 
 
 @click.argument("zipfile", type=click.Path(exists=True), nargs=-1, required=True)
