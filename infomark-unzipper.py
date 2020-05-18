@@ -65,7 +65,10 @@ def prepend_package_prefix(file, prefix):
             try:
                 line = line.decode('utf-8')
             except UnicodeDecodeError:
-                line = line.decode('windows-1252')
+                try:
+                    line = line.decode('windows-1252')
+                except UnicodeDecodeError:
+                    line = line.decode('iso-8859-1')
             if line.lstrip().startswith("package"):
                 line = re.sub(r'package (.+);', r'package ' + prefix + r'.\1;', line)
             new_content += line
