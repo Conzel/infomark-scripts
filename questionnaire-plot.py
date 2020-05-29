@@ -45,8 +45,9 @@ def make_plots(csvfile, sheet):
 def report_stats(time, time_weighting, difficulty, sheet, outfile):
     time = time.loc[sheet]
     difficulty = difficulty.loc[sheet]
+    total_handins = min(sum(time), sum(difficulty))
 
-    title  = f"Report für Blatt {sheet:02d}:\n"
+    title  = f"Report für Blatt {sheet:02d} (Teilnahme: {total_handins} Studenten):\n"
     mean   = f"\tDurchschnittlicher Zeitaufwand: {calc_mean_weighting(time, time_weighting):.2f}\n"
 
     diff_num, diff_desc = difficulty.values[difficulty.argmax()], difficulty.index[difficulty.argmax()]
@@ -54,11 +55,10 @@ def report_stats(time, time_weighting, difficulty, sheet, outfile):
 
     with open(outfile, "w+") as f:
         f.writelines([title, mean, diff_level])
-    
 
 def calc_mean_weighting(array, weighting):
     if len(array) != len(weighting):
-        raise ValueError(f"Length of array {len(arrray)} != length of weighting {len_weighting}")
+        raise ValueError(f"Length of array {len(arrray)} != length of weighting {len(weighting)}")
     mean = 0
     for count, weight in zip(array, weighting):
         mean += count * weight
@@ -73,7 +73,7 @@ def make_time_hist(time, weighting, bins, sheet, plot_kde=True):
         hist_array += [weight] * count
     plt.hist(hist_array, bins=bins, label="Time spent")
     if plot_kde:
-        ker = gaussian_kde(hist_array)
+        ker = gaussian_kde(sample_bins(time, bins))
         x = np.linspace(min(bins) - 1, max(bins) + 1)
         y = ker.evaluate(x)
         plt.plot(x, y / max(y) * max(time), label="KDE")
@@ -81,6 +81,12 @@ def make_time_hist(time, weighting, bins, sheet, plot_kde=True):
     plt.axvline(mean, 0, max(time) + 1, linestyle='dashed', label="Mean", c="black")
     plt.title(f"Histogram of time spent on exercise sheet {sheet}, mean = {mean:.2f}")
     plt.legend()
+    
+def sample_bins(counts, bins):
+    """Takes an array of counts in bins and samples from the bins (assuming
+    uniform distribution of the values in the bins)"""
+    ranges = [(a, b) for a, b in zip(bins, bins[1:])]
+    return np.hstack([np.random.uniform(a, b, n) for (a, b), n in zip(ranges, counts)])
     
 
 def make_difficulty_bar(df, sheet):
