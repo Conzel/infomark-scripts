@@ -7,6 +7,8 @@ import os
 import numpy as np
 from scipy.stats import gaussian_kde
 
+plt.style.use('seaborn')
+
 def csv_to_pandas(csvfile):
     """Returns two dataframes, one containing the average
     amount of time spent per sheet, one containing the 
@@ -44,13 +46,14 @@ def report_stats(time, time_weighting, difficulty, sheet, outfile):
     time = time.loc[sheet]
     difficulty = difficulty.loc[sheet]
 
-    mean   = f"Durchschnittlicher Zeitaufwand: {calc_mean_weighting(time, time_weighting):.2f}\n"
+    title  = f"Report für Blatt {sheet:02d}:\n"
+    mean   = f"\tDurchschnittlicher Zeitaufwand: {calc_mean_weighting(time, time_weighting):.2f}\n"
 
     diff_num, diff_desc = difficulty.values[difficulty.argmax()], difficulty.index[difficulty.argmax()]
-    diff_level = f"Die meisten Studenten empfanden das Blatt als {diff_desc} ({diff_num} Studenten)"
+    diff_level = f"\tDie meisten Studenten empfanden das Blatt als {diff_desc} ({diff_num} Studenten)"
 
     with open(outfile, "w+") as f:
-        f.writelines([mean, diff_level])
+        f.writelines([title, mean, diff_level])
     
 
 def calc_mean_weighting(array, weighting):
