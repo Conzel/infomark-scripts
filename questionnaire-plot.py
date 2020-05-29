@@ -22,7 +22,8 @@ def make_plots(csvfile, sheet):
 
     # setting up for saving
     outdir = os.path.join(os.path.dirname(csvfile), f"sheet_{sheet:02d}")
-    os.mkdir(outdir)
+    if not os.path.exists(outdir):
+        os.mkdir(outdir)
     outpath = lambda f: os.path.join(outdir, f)
     save = lambda f: plt.savefig(outpath(f))
 
