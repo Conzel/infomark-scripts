@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import atexit
 
+import unicodedata
+import sys
 import click
 import zipfile as zf
 import io
@@ -10,6 +14,8 @@ import shutil
 import fileinput
 from collections import namedtuple
 from pathlib import Path
+
+_VERSION = "Infomark Unzipper 0.0.2"
 
 Student = namedtuple('Student', 'firstname surname zipfile')
 
@@ -65,7 +71,10 @@ def prepend_package_prefix(file, prefix):
             try:
                 line = line.decode('utf-8')
             except UnicodeDecodeError:
-                line = line.decode('windows-1252')
+                try:
+                    line = line.decode('windows-1252')
+                except UnicodeDecodeError:
+                    line = line.decode('iso-8859-1')
             if line.lstrip().startswith("package"):
                 line = re.sub(r'package (.+);', r'package ' + prefix + r'.\1;', line)
             new_content += line
@@ -113,6 +122,8 @@ def cli(zipfile, sheet):
     for file in zipfile:
         project_from_zip(file, sheet)
 
-
 if __name__ == "__main__":
-    cli()
+    if len(sys.argv) >= 1 and sys.argv[1] == "--version":
+        print(_VERSION)
+    else:
+        cli()
