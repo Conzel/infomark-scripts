@@ -77,6 +77,8 @@ def prepend_package_prefix(file, prefix):
                     line = line.decode('iso-8859-1')
             if line.lstrip().startswith("package"):
                 line = re.sub(r'package (.+);', r'package ' + prefix + r'.\1;', line)
+            if line.lstrip().startswith("import"):
+                line = re.sub(r'import main\.(.+);', r'import ' + prefix + r'.main.\1;', line)
             new_content += line
 
     with open(file, "w+") as f:
